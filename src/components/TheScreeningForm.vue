@@ -72,7 +72,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import { createSubject } from "@/api/subjects";
 
 export default {
   data() {
@@ -121,36 +121,18 @@ export default {
       this.isSubmitting = true;
       this.errorMessage = null;
       this.successMessage = null;
-      axios
-        .post(
-          "http://localhost/api/v1/subjects",
-          {
-            data: {
-              type: "subjects",
-              attributes: Object.entries(this.formData).reduce(
-                (a, [k, v]) => (v !== "" && v !== null ? ((a[k] = v), a) : a),
-                {},
-              ),
-            },
-          },
-          {
-            headers: {
-              Accept: "application/vnd.api+json",
-              "Content-Type": "application/vnd.api+json",
-            },
-          },
-        )
-        .then((response) => {
-          console.log(response);
-          this.successMessage = response.status === 201 ? true : false;
+      const attributes = Object.entries(this.formData).reduce(
+        (a, [k, v]) => (v !== "" && v !== null ? ((a[k] = v), a) : a),
+        {},
+      );
+      createSubject(attributes)
+        .then((subject) => {
+          this.successMessage = true;
           this.eligibilityConfirmation =
-            response.data.data.attributes.eligibility_confirmation;
+            subject.attributes.eligibility_confirmation;
         })
         .catch((error) => {
-          console.error(error);
-          if (error.response) {
-            this.errorMessage = "An error occurred while submitting the form.";
-          }
+          this.errorMessage = error.message;
         })
         .finally(() => {
           this.isSubmitting = false;

@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import { listSubjects } from "@/api/subjects";
 
 export default {
   data() {
@@ -45,15 +45,9 @@ export default {
   },
   methods: {
     fetchResults() {
-      axios
-        .get("http://localhost/api/v1/subjects", {
-          headers: {
-            Accept: "application/vnd.api+json",
-          },
-        })
-        .then((response) => {
-          console.log(response);
-          this.results = response.data.data;
+      listSubjects()
+        .then((subjects) => {
+          this.results = subjects;
         })
         .catch((error) => {
           console.error(error);
