@@ -13,14 +13,6 @@
         {{ errorMessage }}
       </div>
 
-      <div
-        v-if="eligibilityConfirmation"
-        class="alert alert-success"
-        role="status"
-      >
-        {{ eligibilityConfirmation }}
-      </div>
-
       <div class="mb-3">
         <label for="first_name" class="form-label">First name</label>
         <input
@@ -168,7 +160,6 @@ export default {
       },
       errors: {},
       errorMessage: null,
-      eligibilityConfirmation: null,
       isSubmitting: false,
       frequencies: FREQUENCIES,
       dailyFrequencies: DAILY_FREQUENCIES,
@@ -199,7 +190,6 @@ export default {
   methods: {
     async submitForm() {
       this.errorMessage = null;
-      this.eligibilityConfirmation = null;
       this.errors = validateScreening(this.formData);
       if (Object.keys(this.errors).length) {
         this.errorMessage = "Please fix the highlighted fields.";
@@ -211,9 +201,12 @@ export default {
       this.isSubmitting = true;
       try {
         const subject = await createSubject(toSubjectAttributes(this.formData));
-        this.eligibilityConfirmation =
-          subject.attributes?.eligibility_confirmation ||
-          "Your screening answers were submitted.";
+        // Only the id goes in the URL; the results page re-reads the
+        // confirmation from the API, so it survives a refresh.
+        await this.$router.push({
+          name: "results",
+          query: subject.id ? { submitted: subject.id } : {},
+        });
       } catch (error) {
         if (!(error instanceof ApiError)) throw error;
         this.errorMessage = error.message;

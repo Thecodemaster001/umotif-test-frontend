@@ -2,6 +2,15 @@
   <div class="container py-4">
     <h1 class="h2 text-center mb-3">Results</h1>
 
+    <div
+      v-if="submittedNotice"
+      class="alert"
+      :class="submittedNotice.found ? 'alert-success' : 'alert-warning'"
+      role="status"
+    >
+      {{ submittedNotice.message }}
+    </div>
+
     <p v-if="status === 'loading'" role="status">Loading screening results…</p>
 
     <div v-else-if="status === 'error'" class="alert alert-danger" role="alert">
@@ -36,8 +45,17 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="row in rows" :key="row.id">
-            <td>{{ row.id }}</td>
+          <tr
+            v-for="row in rows"
+            :key="row.id"
+            :class="{ 'table-success': row.id === submittedId }"
+          >
+            <td>
+              {{ row.id }}
+              <span v-if="row.id === submittedId" class="visually-hidden">
+                (your submission)
+              </span>
+            </td>
             <td>{{ row.firstName }}</td>
             <td>{{ row.dateOfBirth }}</td>
             <td>{{ row.frequency }}</td>
@@ -56,6 +74,9 @@
 <script>
 import { ApiError, listSubjects } from "@/api/subjects";
 import { DAILY_FREQUENCIES, FREQUENCIES, labelFor } from "@/screening";
+
+// JSON:API ids are strings; anything else in ?submitted= is a broken link.
+const SUBMITTED_ID = /^[A-Za-z0-9_-]{1,64}$/;
 
 const dateTime = new Intl.DateTimeFormat(undefined, {
   dateStyle: "medium",
@@ -95,6 +116,38 @@ export default {
   computed: {
     rows() {
       return this.subjects.map(toRow);
+    },
+    submittedQuery() {
+      const value = this.$route.query.submitted;
+      return typeof value === "string" ? value : null;
+    },
+    submittedId() {
+      return this.submittedQuery && SUBMITTED_ID.test(this.submittedQuery)
+        ? this.submittedQuery
+        : null;
+    },
+    submittedNotice() {
+      if (this.$route.query.submitted === undefined) return null;
+      if (!this.submittedId) {
+        return {
+          found: false,
+          message: "This results link has an invalid submission id.",
+        };
+      }
+      if (this.status !== "ready") return null;
+      const subject = this.subjects.find((s) => s.id === this.submittedId);
+      if (!subject) {
+        return {
+          found: false,
+          message: `Submission ${this.submittedId} is not in the results.`,
+        };
+      }
+      return {
+        found: true,
+        message:
+          subject.attributes?.eligibility_confirmation ||
+          `Submission ${this.submittedId} was recorded.`,
+      };
     },
   },
   mounted() {

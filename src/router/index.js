@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 
-const routes = [
+export const routes = [
   {
     path: "/",
     name: "screeningForm",
@@ -11,11 +11,11 @@ const routes = [
     name: "results",
     component: () => import("../components/TheResults.vue"),
   },
+  { path: "/:pathMatch(.*)*", redirect: "/" },
 ];
 
-const router = createRouter({
-  history: createWebHistory(),
-  routes: routes,
-});
+export function createAppRouter(history = createWebHistory()) {
+  return createRouter({ history, routes });
+}
 
-export default router;
+export default createAppRouter();

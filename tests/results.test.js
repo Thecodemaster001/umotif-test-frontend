@@ -23,6 +23,12 @@ const subject = {
   },
 };
 
+function mountResults() {
+  return mount(TheResults, {
+    global: { mocks: { $route: { query: {} } } },
+  });
+}
+
 beforeEach(() => {
   listSubjects.mockReset();
 });
@@ -30,13 +36,13 @@ beforeEach(() => {
 describe("TheResults", () => {
   it("announces loading while the request is in flight", () => {
     listSubjects.mockReturnValue(new Promise(() => {}));
-    const wrapper = mount(TheResults);
+    const wrapper = mountResults();
     expect(wrapper.find('[role="status"]').text()).toMatch(/Loading/);
   });
 
   it("renders one cell per header with the confirmation in its own column", async () => {
     listSubjects.mockResolvedValue([subject]);
-    const wrapper = mount(TheResults);
+    const wrapper = mountResults();
     await flushPromises();
 
     const headers = wrapper.findAll("thead th").map((th) => th.text());
@@ -56,7 +62,7 @@ describe("TheResults", () => {
     listSubjects.mockResolvedValue([
       { id: "1", attributes: { first_name: "Cleo", created_at: "not a date" } },
     ]);
-    const wrapper = mount(TheResults);
+    const wrapper = mountResults();
     await flushPromises();
     const cells = wrapper.findAll("tbody td").map((td) => td.text());
     expect(cells[1]).toBe("Cleo");
@@ -65,7 +71,7 @@ describe("TheResults", () => {
 
   it("explains an empty list", async () => {
     listSubjects.mockResolvedValue([]);
-    const wrapper = mount(TheResults);
+    const wrapper = mountResults();
     await flushPromises();
     expect(wrapper.find("table").exists()).toBe(false);
     expect(wrapper.text()).toMatch(/No one has been screened yet/);
@@ -73,7 +79,7 @@ describe("TheResults", () => {
 
   it("shows the error and retries on request", async () => {
     listSubjects.mockRejectedValueOnce(new ApiError("API is down", 503));
-    const wrapper = mount(TheResults);
+    const wrapper = mountResults();
     await flushPromises();
     expect(wrapper.find('[role="alert"]').text()).toMatch(/API is down/);
 

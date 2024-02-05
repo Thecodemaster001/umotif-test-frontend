@@ -8,8 +8,13 @@ vi.mock("@/api/subjects", async (importOriginal) => ({
   createSubject: vi.fn(),
 }));
 
+const push = vi.fn();
+
 function mountForm() {
-  return mount(TheScreeningForm, { attachTo: document.body });
+  return mount(TheScreeningForm, {
+    attachTo: document.body,
+    global: { mocks: { $router: { push } } },
+  });
 }
 
 async function fillAdult(wrapper, { frequency = 2, daily } = {}) {
@@ -21,6 +26,7 @@ async function fillAdult(wrapper, { frequency = 2, daily } = {}) {
 
 beforeEach(() => {
   createSubject.mockReset();
+  push.mockReset();
 });
 
 afterEach(() => {
@@ -82,7 +88,7 @@ describe("TheScreeningForm", () => {
     });
   });
 
-  it("posts valid answers and announces the eligibility confirmation", async () => {
+  it("posts valid answers and opens the results for the new subject", async () => {
     createSubject.mockResolvedValue({
       id: "4",
       attributes: { eligibility_confirmation: "Assigned to Cohort C" },
@@ -98,7 +104,10 @@ describe("TheScreeningForm", () => {
       frequency: 3,
       daily_frequency: 1,
     });
-    expect(wrapper.find('[role="status"]').text()).toBe("Assigned to Cohort C");
+    expect(push).toHaveBeenCalledWith({
+      name: "results",
+      query: { submitted: "4" },
+    });
   });
 
   it("shows the API error message when the submission is rejected", async () => {
