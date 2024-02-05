@@ -3,7 +3,7 @@
     class="d-flex align-items-center justify-content-center"
     style="height: 100vh"
   >
-    <form @submit.prevent="submitForm" class="w-50">
+    <form class="w-50" @submit.prevent="submitForm">
       <div v-if="errorMessage" class="mt-4 alert alert-danger">
         <p>{{ errorMessage }}</p>
       </div>
@@ -17,8 +17,8 @@
       <div class="mb-3">
         <label for="first_name" class="form-label">First Name:</label>
         <input
-          type="text"
           v-model="formData.first_name"
+          type="text"
           class="form-control"
           required
         />
@@ -27,8 +27,8 @@
       <div class="mb-3">
         <label for="date_of_birth" class="form-label">Date of Birth:</label>
         <input
-          type="date"
           v-model="formData.date_of_birth"
+          type="date"
           class="form-control"
           required
         />
@@ -53,7 +53,7 @@
         </p>
       </div>
 
-      <div class="mb-3" v-if="formData.frequency == 3">
+      <div v-if="formData.frequency == 3" class="mb-3">
         <label for="daily_frequency" class="form-label"
           >Daily Frequency (if Daily):</label
         >
@@ -129,7 +129,7 @@ export default {
               type: "subjects",
               attributes: Object.entries(this.formData).reduce(
                 (a, [k, v]) => (v !== "" && v !== null ? ((a[k] = v), a) : a),
-                {}
+                {},
               ),
             },
           },
@@ -138,7 +138,7 @@ export default {
               Accept: "application/vnd.api+json",
               "Content-Type": "application/vnd.api+json",
             },
-          }
+          },
         )
         .then((response) => {
           console.log(response);
