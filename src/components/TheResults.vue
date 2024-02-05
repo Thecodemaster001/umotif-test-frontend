@@ -1,6 +1,17 @@
 <template>
-  <div class="container py-4">
-    <h1 class="h2 text-center mb-3">Results</h1>
+  <div class="container results-page">
+    <div class="results-header">
+      <div>
+        <p class="eyebrow">Study team view</p>
+        <h1>Screening results</h1>
+      </div>
+      <router-link
+        class="btn btn-outline-primary"
+        :to="{ name: 'screeningForm' }"
+      >
+        Screen someone else
+      </router-link>
+    </div>
 
     <div
       v-if="submittedNotice"
@@ -11,9 +22,13 @@
       {{ submittedNotice.message }}
     </div>
 
-    <p v-if="status === 'loading'" role="status">Loading screening results…</p>
+    <p v-if="status === 'loading'" class="panel state-message" role="status">
+      <span class="spinner-border spinner-border-sm me-2" aria-hidden="true" />
+      Loading screening results…
+    </p>
 
     <div v-else-if="status === 'error'" class="alert alert-danger" role="alert">
+      <h2 class="h6 mb-1">The results could not be loaded</h2>
       <p class="mb-2">{{ errorMessage }}</p>
       <button
         type="button"
@@ -24,10 +39,21 @@
       </button>
     </div>
 
-    <p v-else-if="!rows.length" role="status">No one has been screened yet.</p>
+    <div v-else-if="!rows.length" class="panel state-message" role="status">
+      <p class="mb-2">No one has been screened yet.</p>
+      <router-link :to="{ name: 'screeningForm' }">
+        Fill in the first screening form
+      </router-link>
+    </div>
 
-    <div v-else class="table-responsive">
-      <table class="table table-bordered table-striped">
+    <div
+      v-else
+      class="panel table-responsive results-table"
+      role="region"
+      aria-label="Screening results table"
+      tabindex="0"
+    >
+      <table class="table table-hover align-middle mb-0">
         <caption class="visually-hidden">
           Screened participants
         </caption>
@@ -169,3 +195,38 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.results-page {
+  padding-block: 2.5rem 3rem;
+}
+.results-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: end;
+  margin-bottom: 1.5rem;
+}
+.results-header h1 {
+  margin: 0;
+}
+.state-message {
+  padding: 1.5rem;
+}
+.results-table {
+  padding: 0;
+}
+.results-table th {
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--study-muted);
+  white-space: nowrap;
+  background: var(--study-paper);
+}
+.results-table td {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+</style>

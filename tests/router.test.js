@@ -97,4 +97,14 @@ describe("routing", () => {
     const { wrapper } = await mountAt("/results");
     expect(wrapper.find(".alert").exists()).toBe(false);
   });
+
+  it("moves focus to the main region after navigating", async () => {
+    listSubjects.mockResolvedValue([]);
+    const { router, wrapper } = await mountAt("/");
+    await router.push("/results");
+    await vi.waitFor(() =>
+      expect(document.activeElement).toBe(wrapper.find("main").element),
+    );
+    expect(wrapper.find('nav a[aria-current="page"]').text()).toBe("Results");
+  });
 });

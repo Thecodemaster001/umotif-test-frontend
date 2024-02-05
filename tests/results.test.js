@@ -25,7 +25,7 @@ const subject = {
 
 function mountResults() {
   return mount(TheResults, {
-    global: { mocks: { $route: { query: {} } } },
+    global: { mocks: { $route: { query: {} } }, stubs: { RouterLink: true } },
   });
 }
 
